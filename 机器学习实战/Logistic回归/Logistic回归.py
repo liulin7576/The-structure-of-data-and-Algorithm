@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import time
-random.seed(time.time())
+random.seed(time.time()) #这里是为了保证随机梯度下降时选取不同的随机数
 
 
 def loadDataSet(): #导入数据并进行数据转换

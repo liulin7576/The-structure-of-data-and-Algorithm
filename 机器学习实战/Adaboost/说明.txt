@@ -1,0 +1,5 @@
+AdaBoost做出的在第五章马的预测问题上面的测试错误率仅17%，并且训练速度特别快，
+大概循环50次左右
+
+
+其中，weekClass.txt是存取weakClass的pickle格式的文件

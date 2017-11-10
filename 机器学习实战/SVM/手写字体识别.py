@@ -4,15 +4,31 @@ import time
 import matplotlib.pyplot as plt
 random.seed(time.time())
 
-def loadDataSet(filename): #导入数据并将数据进行分割
+def img2Vec(filename): #将二值图片转换为向量
     f = open(filename)
-    trainSet, trainLabel = [], []
+    fm = f.readlines()
+    returnVec = np.zeros((1, 1024))
+    for i in range(32):
+        for j in range(32):
+            returnVec[0, 32*i + j] = int(fm[i][j])
+    return returnVec
 
-    for line in f.readlines():
-        lineArr = line.strip().split('\t')
-        trainSet.append([float(lineArr[0]), float(lineArr[1])])
-        trainLabel.append(int(float(lineArr[-1])))
-    return np.mat(trainSet), np.mat(trainLabel).T
+def loadImg(dirName): # 加载目录
+    from os import listdir
+    hwLabel = []
+    trainFileList = listdir(dirName)
+    m = len(trainFileList)
+    trainMat = np.zeros((m, 1024))
+    for i in range(m):
+        fileNameStr = trainFileList[i]
+        fileStr = fileNameStr.split('.')[0]
+        classNum = int(fileStr.split('_')[0])
+        if classNum == 9:       #这里只做是9还是不是9的分类情况
+            hwLabel.append(-1)
+        else:
+            hwLabel.append(1)
+        trainMat[i, :] = img2Vec('%s\%s' %(dirName, fileNameStr))
+    return np.mat(trainMat), np.mat(hwLabel).T
 
 
 def selectJrand(i, m): #随机选取一个除i以外的值
@@ -57,7 +73,7 @@ class optStruct:  #构造类存储所需的变量，便于访问
         self.alphas = np.mat(np.zeros((self.m, 1)))
         self.b = 0
         self.cache = np.mat(np.zeros((self.m, 2)))
-        self.K = np.mat(np.zeros((self.m, self.m)))
+        self.K = np.mat(np.zeros((self.m, self.m))) #核函数的初始化
         for i in range(self.m):
             self.K[:, i] = kernelTrans(self.dataSet, self.dataSet[i, :], kTup)
 
@@ -154,20 +170,12 @@ def smoP(dataSet, dataLabel, C, toler, maxIter, kTup = ('lin', 0)): #完整的SM
             entireSet = True
     return oS.b, oS.alphas
 
-def img2Vec(filename):
-    f = open(filename)
-    fm = f.readlines()
-    returnVec = np.zeros((1, 1024))
-    for i in range(32):
-        for j in range(32):
-            returnVec[0, 32*i + j] = int(fm[i][j])
-    return returnVec
 
 def testRbf(k1 = 5):  #用rbf核函数进行训练模型和预测
     dirName = 'F:/github/MachineLearning全/input/6.SVM/trainingDigits'
     dataSet, dataLabel = loadImg(dirName)
     b, alphas = smoP(dataSet, dataLabel, 300, 0.0001, 20000, ('rbf', k1))
-    svInd = np.nonzero(alphas.A > 0)[0]
+    svInd = np.nonzero(alphas.A > 0)[0] #找出alpha>0的下标，对应的即为支撑向量
     svs = dataSet[svInd]
     labelSV = dataLabel[svInd]
     print('There are %d Support vector' %len(svs))
@@ -175,8 +183,8 @@ def testRbf(k1 = 5):  #用rbf核函数进行训练模型和预测
     errCount = 0
     for i in range(m):
         kernelEval = kernelTrans(svs, dataSet[i, :], ('rbf', k1))
-        yhat = kernelEval.T * np.multiply(labelSV, alphas[svInd]) + b
-        if yhat >= 0:
+        yhat = kernelEval.T * np.multiply(labelSV, alphas[svInd]) + b  #不要漏了这个b，用支撑向量来进行预测简化计算，因为
+        if yhat >= 0:												   #因为非支撑向量不影响最后结果， 其对应的alpha = 0
             yhat = 1
         else:   
             yhat = -1
@@ -197,40 +205,5 @@ def testRbf(k1 = 5):  #用rbf核函数进行训练模型和预测
         if yhat != testLabel[i]:
             errCount += 1
     print('The testError rate is {}%'.format(errCount/m * 100))
-
-def loadImg(dirName): # 加载目录
-    from os import listdir
-    hwLabel = []
-    trainFileList = listdir(dirName)
-    m = len(trainFileList)
-    trainMat = np.zeros((m, 1024))
-    for i in range(m):
-        fileNameStr = trainFileList[i]
-        fileStr = fileNameStr.split('.')[0]
-        classNum = int(fileStr.split('_')[0])
-        if classNum == 9:
-            hwLabel.append(-1)
-        else:
-            hwLabel.append(1)
-        trainMat[i, :] = img2Vec('%s\%s' %(dirName, fileNameStr))
-    return np.mat(trainMat), np.mat(hwLabel).T
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

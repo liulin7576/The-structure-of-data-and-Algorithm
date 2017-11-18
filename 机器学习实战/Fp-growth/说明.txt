@@ -1,0 +1,3 @@
+本来全部是用jupyter notebook写的，后来为了看的方便，直接下载为了.py
+强烈安利anaconda，安装jupyter notebook,利用anaconda会解决很多包的问题，
+并且编代码效率很高，不要安装win32位的anaconda。。。。切记切记！！！

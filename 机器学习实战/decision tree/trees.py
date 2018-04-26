@@ -104,6 +104,5 @@ def grabTree(filename): #将树取出来
 dataSet, label = createData()
 myTree = createTree(dataSet, label)
 print(myTree)
-dataSet, label = createData()
 filename = r'E:\python编程处\机器学习实战\决策树\storeTree.txt'
 storeTree(myTree, filename)
